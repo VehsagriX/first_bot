@@ -83,7 +83,7 @@ def get_currency(message, amount=0):
         bot.send_message(message.chat.id, 'Ты смеешься надо мной? как из пустоты мне тебе помочь😐? Давай попробуй заново')
         bot.register_next_step_handler(message, get_currency)
 
-    print(amounts[str(message.chat.id)])
+
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback(call):
@@ -96,7 +96,7 @@ def callback(call):
         values = values.split('/')
         data = json.loads(response.text)
         result = data['conversion_result']
-        bot.send_message(call.message.chat.id, f'{amount} {values[0]}= {result} {values[1]}')
+        bot.send_message(call.message.chat.id, f'{amount} {values[0]} = {result} {values[1]}')
     else:
         markup = types.InlineKeyboardMarkup()
         btn_info = types.InlineKeyboardButton('тут я тебе помогу', callback_data='info')
@@ -106,15 +106,14 @@ def callback(call):
 
 
 
-# @bot.callback_query_handler(func=lambda call: True)
-# def call_else(call):
-#     if call.data == 'info':
-#         res = requests.get(f'https://v6.exchangerate-api.com/v6/{API_CURRENCY_KEY}/codes')
-#         data = json.loads(res.text)
-#         print(data)
-#
-# def my_currency(message):
-#     pass
+@bot.callback_query_handler(func=lambda call: True)
+def call_else(call):
+    if call.data == 'info':
+        res = requests.get(f'https://v6.exchangerate-api.com/v6/{API_CURRENCY_KEY}/codes')
+        print(res.status_code)
+
+
+
 
 
 
