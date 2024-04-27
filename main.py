@@ -28,7 +28,9 @@ def start(message):
 
 
 
-
+def get_restart(message):
+    bot.send_message(message.chat.id, 'Что бы ты еще хотел узнать? Выбор за тобой')
+    bot.register_next_step_handler(message, click_on)
 
 def click_on(message):
     if message.text == 'Узнать погоду':
@@ -61,8 +63,7 @@ def get_weather(message):
                 bot.reply_to(message, f'Cейчас: ☔️☔️☔️ {weather} {temp} °C')
             elif weather.lower() == 'snow':
                 bot.reply_to(message, f'Cейчас: 🌨🌨🌨 {weather} {temp} °C')
-            bot.send_message(message.chat.id, 'Погоду в каком городе хотел бы еще узнать?')
-            bot.register_next_step_handler(message, get_weather)
+            get_restart(message)
         else:
             bot.send_message(message.chat.id, 'Неверный указан город, введите заново')
             bot.register_next_step_handler(message, get_weather)
@@ -111,7 +112,6 @@ def callback(call):
         result = res.json()
         data = ['-'.join(item) for item in result["supported_codes"]]
         text_message = '\n'.join(data)
-        print(text_message)
         bot.send_message(call.message.chat.id, f'{text_message}')
         bot.send_message(call.message.chat.id, 'Выбери то что тебе нужно и напиши валюты через слэш, например "USD/EUR ')
         bot.register_next_step_handler(call.message, convert)
@@ -126,12 +126,17 @@ def convert(message, currencies:str=None):
     amount = amounts[str(message.chat.id)]
     values = currencies
     response = requests.get(f'https://v6.exchangerate-api.com/v6/{API_CURRENCY_KEY}/pair/{values}/{amount}')
-    values = values.split('/')
-    data = json.loads(response.text)
-    result = data['conversion_result']
-    bot.send_message(message.chat.id, f'{amount} {values[0]} = {result} {values[1]}')
+    if response.status_code == 200:
+        values = values.split('/')
+        data = json.loads(response.text)
+        result = data['conversion_result']
+        bot.send_message(message.chat.id, f'{amount} {values[0]} = {result} {values[1]}')
+        get_restart(message)
 
-
+    else:
+        bot.send_message(message.chat.id, 'Ты ввел неверно, попробуй снова')
+        bot.register_next_step_handler(message, convert)
+        return
 
 
 
